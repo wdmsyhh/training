@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "babel-preset-es2015": "^6.24.1",
+    "eslint": "^7.3.0"
+  },
+  "name": "es6",
+  "version": "1.0.0",
+  "main": "fs.js",
+  "license": "MIT"
+}
