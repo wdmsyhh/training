@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>计算器</title>
+        <style>
+            input{
+                width: 30px;
+            }
+            #resultid{
+                width: 130px;
+                height: 30px;
+            }
+        </style>
+        <script>
+            var numCache = ''
+            var operator = ''
+            var numCacheFirst = ''
+
+            function getInput(val){
+                if(val == '+/-'){
+                    var resultidDom = document.getElementById('resultid')
+                    resultidDom.value = 0 - parseFloat(resultidDom.value)
+                    numCacheFirst = 0 - numCacheFirst
+                } else {
+                    var resultidDom = document.getElementById('resultid')
+                    resultidDom.value += val
+                    numCacheFirst += val
+                }
+            }
+            function getOperator(val){
+                if(numCacheFirst != '' && numCache != ''){
+                    calculate(numCache, operator, numCacheFirst)
+                }
+                operator = val
+                var resultidDom = document.getElementById('resultid')
+                resultidDom.value += val
+                numCache = numCacheFirst
+                numCacheFirst = 0 
+            }
+            function clearInput(){
+                var resultidDom = document.getElementById("resultid")
+                resultidDom.value = ''
+                numCacheFirst = ''
+                numCache = ''
+            }
+            function calculate(val1, o, val2){
+                var num1 = parseFloat(val1)
+                var num2 = parseFloat(val2)
+                var resultidDom = document.getElementById('resultid')
+                if(o == '+'){
+                    resultidDom.value = num1 + num2
+                } 
+                if(o == '-'){
+                    resultidDom.value = num1 - num2
+                }
+                if(o == 'x'){
+                    resultidDom.value = num1 * num2
+                }
+                if(o == '/'){
+                    resultidDom.value = num1 / num2
+                }
+                if(o == '%'){
+                    resultidDom.value = num1 % num2
+                }
+                numCacheFirst = resultidDom.value
+                numCache = ''
+            }
+        </script>
+    </head>
+    <body>
+        <table style="margin: auto;">
+            <tr>
+                <td colspan="4"><input type="text" id="resultid" style="text-align: right;" readonly="readonly"></td>
+            </tr>
+            <tr>
+                <td><input type="button" value="AC" onclick="clearInput()"></td>
+                <td><input type="button" value="+/-" onclick="getInput('+/-')"></td>
+                <td><input type="button" value="%" onclick="getOperator('%')"></td>
+                <td><input type="button" value="/" onclick="getOperator('/')"></td>
+            </tr>
+            <tr>
+                <td><input type="button" value="7" onclick="getInput('7')"></td>
+                <td><input type="button" value="8" onclick="getInput('8')"></td>
+                <td><input type="button" value="9" onclick="getInput('9')"></td>
+                <td><input type="button" value="x" onclick="getOperator('x')"></td>
+            </tr>
+            <tr>
+                <td><input type="button" value="4" onclick="getInput('4')"></td>
+                <td><input type="button" value="5" onclick="getInput('5')"></td>
+                <td><input type="button" value="6" onclick="getInput('6')"></td>
+                <td><input type="button" value="-" onclick="getOperator('-')"></td>
+            </tr>
+            <tr>
+                <td><input type="button" value="1" onclick="getInput('1')"></td>
+                <td><input type="button" value="2" onclick="getInput('2')"></td>
+                <td><input type="button" value="3" onclick="getInput('3')"></td>
+                <td><input type="button" value="+" onclick="getOperator('+')"></td>
+            </tr>
+            <tr>
+                <td colspan="2"><input type="button" value="0" style="width: 60px;" onclick="getInput('0')"></td>
+                <td><input type="button" value="." onclick="getInput('.')"></td>
+                <td><input type="button" value="=" onclick="calculate(numCache, operator, numCacheFirst)"></td>
+            </tr>
+        </table>
+    </body>
+</html>
