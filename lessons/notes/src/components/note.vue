@@ -1,7 +1,7 @@
 <template>
     <div id="note">
         <span style="display:none">{{index}}</span><span :style="{color:color}" id="nodecontent">{{content}}</span>
-        <button @click="deleteNote" id="deleteButton">x</button>
+        <van-button @click="deleteNote" id="deleteButton" type="danger" size="mini">删除</van-button>
     </div>
 </template>
 <script>
@@ -18,7 +18,7 @@ export default {
 <style scoped>
 #note{
     width: 400px;
-    margin: auto
+    margin: auto;
 }
 #deleteButton{
     float: right;
