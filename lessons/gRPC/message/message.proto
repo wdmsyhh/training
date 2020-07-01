@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package message;
+
+//计算请求，三角形三条边
+message CalculateRequest {
+    float firstSide = 1;
+    float secondSide = 2;
+    float thirdSide = 3; 
+}
+
+message CalculateResponse {
+    //计算结果
+    float calculateResult = 1;
+    //描述计算的是周长或面积
+    string circumferenceOrArea = 2;
+}
+
+message CheckResponse {
+    //结果为 false 则不是三角形，为 true 是三角形
+    bool checkResult = 1;
+}
+
+service CalculateService {
+    //计算周长或面积
+    rpc CalculateCircumferenceOrArea (CalculateRequest) returns (CalculateResponse);
+    //判断是否是三角形
+    rpc CheckTriangle (CalculateRequest) returns (CheckResponse);
+}
