@@ -1,13 +1,14 @@
 package main
 
 import (
-	"gRPC/message"
-	"google.golang.org/grpc"
-	"net"
 	"context"
-	"math"
-	"google.golang.org/grpc/metadata"
 	"fmt"
+	"gRPC/message"
+	"math"
+	"net"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
 )
 
 type CalculateServiceImpl struct {
@@ -17,7 +18,7 @@ func (cs *CalculateServiceImpl) CheckTriangle(ctx context.Context, request *mess
 
 	var response *message.CheckResponse
 
-	if ( request.FirstSide + request.SecondSide > request.ThirdSide && request.FirstSide + request.ThirdSide >  request.SecondSide && request.SecondSide + request.ThirdSide > request.FirstSide) {
+	if request.FirstSide+request.SecondSide > request.ThirdSide && request.FirstSide+request.ThirdSide > request.SecondSide && request.SecondSide+request.ThirdSide > request.FirstSide {
 		response = &message.CheckResponse{CheckResult: true}
 	} else {
 		response = &message.CheckResponse{CheckResult: false}
@@ -36,16 +37,16 @@ func (cs *CalculateServiceImpl) CalculateCircumferenceOrArea(ctx context.Context
 	fmt.Println(metadataSlice[0])
 
 	var response *message.CalculateResponse
-	p := (request.FirstSide + request.SecondSide + request.ThirdSide)/2
+	p := (request.FirstSide + request.SecondSide + request.ThirdSide) / 2
 
 	//计算周长
-	if (metadataSlice[0] == "circumference") {
+	if metadataSlice[0] == "circumference" {
 		calculateResult := request.FirstSide + request.SecondSide + request.ThirdSide
 		response = &message.CalculateResponse{CalculateResult: calculateResult, CircumferenceOrArea: metadataSlice[0]}
 	}
 	//计算面积
-	if (metadataSlice[0] == "area") {
-		calculateResult := math.Sqrt(float64(p*(p - request.FirstSide)*(p - request.SecondSide)*(p - request.ThirdSide)))
+	if metadataSlice[0] == "area" {
+		calculateResult := math.Sqrt(float64(p * (p - request.FirstSide) * (p - request.SecondSide) * (p - request.ThirdSide)))
 		response = &message.CalculateResponse{CalculateResult: float32(calculateResult), CircumferenceOrArea: metadataSlice[0]}
 	}
 	return response, nil

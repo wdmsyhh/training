@@ -1,10 +1,12 @@
 package main
 
 import (
-	"google.golang.org/grpc"
-	"gRPC/message"
 	"context"
 	"fmt"
+	"gRPC/message"
+	"log"
+
+	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 )
 
@@ -16,7 +18,7 @@ func main() {
 	defer conn.Close()
 
 	client := message.NewCalculateServiceClient(conn)
-	
+
 	//创建 metadata 值为 circumference 计算周长，值为 area 计算面积
 	md := metadata.Pairs("key", "circumference")
 	ctx := metadata.NewOutgoingContext(context.Background(), md)
@@ -25,14 +27,19 @@ func main() {
 
 	checkRsponse, err := client.CheckTriangle(context.Background(), calculateRequest)
 
-	if checkRsponse != nil {
-		fmt.Println(checkRsponse.CheckResult)
-		//判断是三角形再进行计算
-		if checkRsponse.CheckResult == true {
-			calculateResponse, _ := client.CalculateCircumferenceOrArea(ctx, calculateRequest)
-			if calculateResponse != nil {
-				fmt.Println(calculateResponse.CircumferenceOrArea, calculateResponse.CalculateResult)
-			}
-		}
+	if err != nil {
+		log.Fatal(err)
+		return
 	}
+	fmt.Println(checkRsponse.CheckResult)
+	//判断是三角形再进行计算
+	if checkRsponse.CheckResult == false {
+		return
+	}
+	calculateResponse, err := client.CalculateCircumferenceOrArea(ctx, calculateRequest)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+	fmt.Println(calculateResponse.CircumferenceOrArea, calculateResponse.CalculateResult)
 }
