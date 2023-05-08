@@ -9,7 +9,7 @@ async function readThenSortToTarget(source, target) {
         arr.sort(function(o1, o2) {
             return o1 - o2;
         })
-        await writeFile(target, arr)
+        await writeFile(target, arr.join(','))
     } catch(e) {
         console.log(e.message)
     }
