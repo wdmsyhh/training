@@ -3,9 +3,10 @@ module todoserver
 go 1.19
 
 require (
-	github.com/garyburd/redigo v1.6.4
 	github.com/gin-gonic/gin v1.9.0
 	github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8
+	github.com/gomodule/redigo v1.8.9
+	github.com/spf13/cast v1.5.1
 )
 
 require (

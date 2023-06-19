@@ -3,14 +3,14 @@ package utils
 import (
 	"fmt"
 
-	"github.com/garyburd/redigo/redis"
+	"github.com/gomodule/redigo/redis"
 )
 
 type RedisUtil struct {
 }
 
 func (redisUtil *RedisUtil) ConnectRedis() redis.Conn {
-	conn, err := redis.Dial("tcp", "127.0.0.1:6379")
+	conn, err := redis.Dial("tcp", "127.0.0.1:6379", redis.DialPassword("123456"))
 	if err != nil {
 		fmt.Println("Connect to redis error", err)
 		return nil
