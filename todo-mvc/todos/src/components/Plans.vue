@@ -120,7 +120,7 @@ export default {
             //发起请求
             if(e != null) {
                 plan.isCompleted = e.target.checked
-            } 
+            }
             axios.put('/plans/'+id, plan).then(function(response) {
                 if(response.data.code == 1) {
                     _this.getPlans()
@@ -168,6 +168,9 @@ export default {
                 if(response.data.code == 0) {
                     _this.$router.push({ path: '/' })
                 }
+            }).catch(error => {
+                console.log(error.response)
+                this.$router.push({ path: '/' })
             })
         }
     },

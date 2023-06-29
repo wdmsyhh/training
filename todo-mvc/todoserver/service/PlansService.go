@@ -1,69 +1,64 @@
 package service
 
 import (
+	"context"
+	"todoserver/extension"
 	"todoserver/model"
-	"todoserver/utils"
 
 	"github.com/globalsign/mgo/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type PlansService struct {
 }
 
-var mongoUtil = new(utils.MongoUtil)
-
-//添加
-func (plansService *PlansService) AddPlan(plan model.Plan, userKey string) error {
-	session, c := mongoUtil.ConnectMongo("plans")
-	conn := redisUtil.ConnectRedis()
-	defer session.Close()
-	defer conn.Close()
-
-	userId := redisUtil.GetUserIdFromRedis(userKey)
-	plan.Id = bson.NewObjectId()
+// 添加
+func (plansService *PlansService) AddPlan(ctx context.Context, plan model.Plan, userId string) error {
+	plan.Id = primitive.NewObjectID()
 	plan.UserId = userId
-	err := c.Insert(plan)
+	_, err := extension.MongoCollection("plans").InsertOne(ctx, plan)
 	return err
 }
 
-//修改状态
-func (plansService *PlansService) UpdatePlan(id string, plan model.Plan) error {
-	session, c := mongoUtil.ConnectMongo("plans")
-	defer session.Close()
-
-	err := c.Update(bson.M{"_id": bson.ObjectIdHex(id)}, bson.M{"$set": bson.M{"content": plan.Content, "isCompleted": plan.IsCompleted}})
+// 修改状态
+func (plansService *PlansService) UpdatePlan(ctx context.Context, id string, plan model.Plan) error {
+	objId, _ := primitive.ObjectIDFromHex(id)
+	selector := primitive.M{
+		"_id": objId,
+	}
+	updater := primitive.M{
+		"$set": primitive.M{
+			"content":     plan.Content,
+			"isCompleted": plan.IsCompleted,
+		},
+	}
+	err := extension.MongoCollection("plans").UpdateOne(ctx, selector, updater)
 	return err
 }
 
-//删除一条
-func (plansService *PlansService) DeleteOne(id string) error {
-	session, c := mongoUtil.ConnectMongo("plans")
-	defer session.Close()
+// 删除一条
+func (plansService *PlansService) DeleteOne(ctx context.Context, id string) error {
 	//根据 ObjectId 删除
-	err := c.Remove(bson.M{"_id": bson.ObjectIdHex(id)})
+	objId, _ := primitive.ObjectIDFromHex(id)
+	err := extension.MongoCollection("plans").Remove(ctx, bson.M{"_id": objId})
 	return err
 }
 
-//查询所有
-func (plansService *PlansService) FindAll(userKey string) []model.Plan {
-	session, c := mongoUtil.ConnectMongo("plans")
-	defer session.Close()
-
+// 查询所有
+func (plansService *PlansService) FindAll(ctx context.Context, userId string) []model.Plan {
 	var plans []model.Plan
-	userId := redisUtil.GetUserIdFromRedis(userKey)
-	c.Find(bson.M{"userId": userId}).All(&plans)
+	selector := primitive.M{
+		"userId": userId,
+	}
+	extension.MongoCollection("plans").Find(ctx, selector).All(&plans)
 	return plans
 }
 
-//修改 plan.isCompleted 为 true 或 false
-func (plansService *PlansService) UpdateAllStatus(activeCount int, userKey string) error {
-	session, c := mongoUtil.ConnectMongo("plans")
-	defer session.Close()
-
+// 修改 plan.isCompleted 为 true 或 false
+func (plansService *PlansService) UpdateAllStatus(ctx context.Context, activeCount int, userId string) error {
 	var plans []model.Plan
 	var err error
-	userId := redisUtil.GetUserIdFromRedis(userKey)
-	c.Find(bson.M{"userId": userId}).All(&plans)
+	extension.MongoCollection("plans").Find(ctx, bson.M{"userId": userId}).All(&plans)
 	var isCompleted bool
 	//activeCount 为 ０ 时表示已全部完成，这时修改为未完成
 	if activeCount == 0 {
@@ -73,7 +68,10 @@ func (plansService *PlansService) UpdateAllStatus(activeCount int, userKey strin
 	}
 
 	for i := 0; i < len(plans); i++ {
-		err = c.Update(bson.M{"_id": plans[i].Id}, bson.M{"$set": bson.M{"isCompleted": isCompleted}})
+		err = extension.MongoCollection("plans").UpdateOne(
+			ctx,
+			primitive.M{"_id": plans[i].Id},
+			primitive.M{"$set": primitive.M{"isCompleted": isCompleted}})
 		if err != nil {
 			return err
 		}
@@ -81,12 +79,8 @@ func (plansService *PlansService) UpdateAllStatus(activeCount int, userKey strin
 	return nil
 }
 
-//删除已完成的 plan
-func (plansService *PlansService) DeleteCompletedPlans(userKey string) error {
-	session, c := mongoUtil.ConnectMongo("plans")
-	defer session.Close()
-
-	userId := redisUtil.GetUserIdFromRedis(userKey)
-	_, err := c.RemoveAll(bson.M{"userId": userId, "isCompleted": true})
+// 删除已完成的 plan
+func (plansService *PlansService) DeleteCompletedPlans(ctx context.Context, userId string) error {
+	_, err := extension.MongoCollection("plans").RemoveAll(ctx, bson.M{"userId": userId, "isCompleted": true})
 	return err
 }

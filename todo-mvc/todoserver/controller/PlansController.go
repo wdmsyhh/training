@@ -4,7 +4,6 @@ import (
 	"todoserver/model"
 	"todoserver/response"
 	"todoserver/service"
-	"todoserver/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -13,9 +12,8 @@ type PlansController struct {
 }
 
 var plansService = new(service.PlansService)
-var cookieUtil = new(utils.CookieUtil)
 
-func (plansController *PlansController) Router(router *gin.Engine) {
+func (plansController *PlansController) Router(router *gin.RouterGroup) {
 	//查询所有
 	router.GET("/plans", plansController.findAll)
 	//添加一条 plan
@@ -31,24 +29,24 @@ func (plansController *PlansController) Router(router *gin.Engine) {
 }
 
 func (plansController *PlansController) findAll(context *gin.Context) {
-	userKey := cookieUtil.GetCookie(context)
-	if userKey == "" {
-		response.Failed(context, "获取 cookie 失败。")
+	userId := context.GetString("userId")
+	if userId == "" {
+		response.Failed(context, "获取 userId 失败。")
 		return
 	}
-	plans := plansService.FindAll(userKey)
+	plans := plansService.FindAll(context, userId)
 	response.Success(context, plans)
 }
 
 func (plansController *PlansController) addPlan(context *gin.Context) {
-	userKey := cookieUtil.GetCookie(context)
+	userId := context.GetString("userId")
 	var plan model.Plan
 	err := context.BindJSON(&plan)
 	if err != nil {
 		response.Failed(context, response.BIND_PARAM_ERROR)
 		return
 	}
-	err = plansService.AddPlan(plan, userKey)
+	err = plansService.AddPlan(context, plan, userId)
 	if err != nil {
 		response.Failed(context, response.ADD_ERROR)
 		return
@@ -64,7 +62,7 @@ func (plansController *PlansController) updatePlan(context *gin.Context) {
 		response.Failed(context, response.BIND_PARAM_ERROR)
 		return
 	}
-	err = plansService.UpdatePlan(id, plan)
+	err = plansService.UpdatePlan(context, id, plan)
 	if err != nil {
 		response.Failed(context, response.UPDATE_ERROR)
 		return
@@ -74,7 +72,7 @@ func (plansController *PlansController) updatePlan(context *gin.Context) {
 
 func (plansController *PlansController) deleteOne(context *gin.Context) {
 	id := context.Param("id")
-	err := plansService.DeleteOne(id)
+	err := plansService.DeleteOne(context, id)
 	if err != nil {
 		response.Failed(context, response.DELETE_ERROR)
 		return
@@ -83,14 +81,14 @@ func (plansController *PlansController) deleteOne(context *gin.Context) {
 }
 
 func (plansController *PlansController) updateAllStatus(context *gin.Context) {
-	userKey := cookieUtil.GetCookie(context)
+	userId := context.GetString("userId")
 	var activeCount map[string]int
 	err := context.BindJSON(&activeCount)
 	if err != nil {
 		response.Failed(context, response.BIND_PARAM_ERROR)
 		return
 	}
-	err = plansService.UpdateAllStatus(activeCount["activeCount"], userKey)
+	err = plansService.UpdateAllStatus(context, activeCount["activeCount"], userId)
 	if err != nil {
 		response.Failed(context, response.UPDATE_ERROR)
 	}
@@ -98,8 +96,8 @@ func (plansController *PlansController) updateAllStatus(context *gin.Context) {
 }
 
 func (plansController *PlansController) deleteCompletedPlans(context *gin.Context) {
-	userKey := cookieUtil.GetCookie(context)
-	err := plansService.DeleteCompletedPlans(userKey)
+	userId := context.GetString("userId")
+	err := plansService.DeleteCompletedPlans(context, userId)
 	if err != nil {
 		response.Failed(context, response.DELETE_ERROR)
 		return
