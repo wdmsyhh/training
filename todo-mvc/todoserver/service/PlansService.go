@@ -5,7 +5,6 @@ import (
 	"todoserver/extension"
 	"todoserver/model"
 
-	"github.com/globalsign/mgo/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -40,7 +39,7 @@ func (plansService *PlansService) UpdatePlan(ctx context.Context, id string, pla
 func (plansService *PlansService) DeleteOne(ctx context.Context, id string) error {
 	//根据 ObjectId 删除
 	objId, _ := primitive.ObjectIDFromHex(id)
-	err := extension.MongoCollection("plans").Remove(ctx, bson.M{"_id": objId})
+	err := extension.MongoCollection("plans").Remove(ctx, primitive.M{"_id": objId})
 	return err
 }
 
@@ -58,7 +57,7 @@ func (plansService *PlansService) FindAll(ctx context.Context, userId string) []
 func (plansService *PlansService) UpdateAllStatus(ctx context.Context, activeCount int, userId string) error {
 	var plans []model.Plan
 	var err error
-	extension.MongoCollection("plans").Find(ctx, bson.M{"userId": userId}).All(&plans)
+	extension.MongoCollection("plans").Find(ctx, primitive.M{"userId": userId}).All(&plans)
 	var isCompleted bool
 	//activeCount 为 ０ 时表示已全部完成，这时修改为未完成
 	if activeCount == 0 {
@@ -81,6 +80,6 @@ func (plansService *PlansService) UpdateAllStatus(ctx context.Context, activeCou
 
 // 删除已完成的 plan
 func (plansService *PlansService) DeleteCompletedPlans(ctx context.Context, userId string) error {
-	_, err := extension.MongoCollection("plans").RemoveAll(ctx, bson.M{"userId": userId, "isCompleted": true})
+	_, err := extension.MongoCollection("plans").RemoveAll(ctx, primitive.M{"userId": userId, "isCompleted": true})
 	return err
 }

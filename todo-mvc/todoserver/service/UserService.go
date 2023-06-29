@@ -7,7 +7,6 @@ import (
 	"todoserver/extension"
 	"todoserver/model"
 
-	"github.com/globalsign/mgo/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -25,7 +24,7 @@ func (userService *UserService) Register(ctx context.Context, user model.User) e
 // 登录
 func (userService *UserService) Login(ctx context.Context, user model.User) (*model.User, error) {
 	password := user.Password
-	err := extension.MongoCollection("user").Find(ctx, bson.M{"userName": user.UserName}).One(&user)
+	err := extension.MongoCollection("user").Find(ctx, primitive.M{"userName": user.UserName}).One(&user)
 	if err != nil {
 		return nil, err
 	}
